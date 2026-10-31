@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Innenleben Wallpaper</title>
+  <meta name="description" content="Wallpaper „Blick zum Innenleben“ – passend für dein Gerät erzeugen.">
+  <meta name="theme-color" content="#121018">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Blick zum Innenleben</h1>
+    <p class="sub">Wallpaper, zugeschnitten auf dein Gerät.</p>
+  </header>
+
+  <main>
+    <form id="form" class="card" autocomplete="off">
+      <fieldset>
+        <legend>Gerät</legend>
+        <label class="field">
+          <span>Format</span>
+          <select id="preset" name="preset"></select>
+        </label>
+        <div id="custom" class="row" hidden>
+          <label class="field"><span>Breite (px)</span><input id="cw" type="number" min="320" max="3840" step="1" inputmode="numeric"></label>
+          <label class="field"><span>Höhe (px)</span><input id="ch" type="number" min="320" max="3840" step="1" inputmode="numeric"></label>
+        </div>
+        <p id="deviceInfo" class="hint"></p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Motiv &amp; Stil</legend>
+        <div id="options"></div>
+      </fieldset>
+
+      <button id="generate" class="primary" type="submit">Wallpaper erzeugen</button>
+      <p id="quota" class="hint"></p>
+    </form>
+
+    <section id="result" class="card" hidden aria-live="polite">
+      <div class="frame" id="frame">
+        <img id="preview" alt="Vorschau des erzeugten Wallpapers">
+      </div>
+      <div class="actions">
+        <a id="downloadFree" class="secondary" download="innenleben-vorschau.jpg">Gratis speichern (mit Wasserzeichen)</a>
+        <button id="buy" class="primary" type="button" hidden></button>
+        <button id="again" class="ghost" type="button">Neue Variante</button>
+      </div>
+      <p class="hint">Die Vollversion hat die volle Auflösung deines Geräts und kein Wasserzeichen. Das Original wird 48 Stunden gespeichert.</p>
+    </section>
+
+    <section id="paid" class="card" hidden aria-live="polite">
+      <h2>Danke für deinen Kauf!</h2>
+      <div class="frame"><img id="fullImg" alt="Dein Wallpaper in voller Auflösung"></div>
+      <div class="actions">
+        <a id="downloadFull" class="primary">Vollversion herunterladen</a>
+      </div>
+      <p class="hint">Den Download-Link kannst du innerhalb von 48 Stunden erneut öffnen.</p>
+    </section>
+
+    <p id="status" class="status" role="status"></p>
+  </main>
+
+  <footer class="foot">
+    <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
+  </footer>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

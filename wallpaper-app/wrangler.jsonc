@@ -1,0 +1,31 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "innenleben-wallpaper",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // PWA-Dateien; /api/* läuft zuerst durch den Worker.
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": ["/api/*"] },
+
+  // Workers AI (Free: 10.000 Neurons/Tag, darüber Fehler statt Kosten auf dem Free-Plan)
+  "ai": { "binding": "AI" },
+
+  // Cloudflare Images: Zuschnitt + Wasserzeichen serverseitig
+  "images": { "binding": "IMAGES" },
+
+  // KV: Zähler für Limits + Originalbilder (48 h). ID nach `wrangler kv namespace create KV` eintragen.
+  "kv_namespaces": [{ "binding": "KV", "id": "REPLACE_WITH_KV_NAMESPACE_ID" }],
+
+  "vars": {
+    "FREE_PER_DAY": "3",
+    "DAILY_IMAGE_CAP": "120",
+    "PRICE_CENTS": "199",
+    "CURRENCY": "eur",
+    "IMAGE_MODEL": "@cf/black-forest-labs/flux-1-schnell",
+    // "template" = kostenlos. "claude" nur mit ANTHROPIC_API_KEY (verursacht Kosten!)
+    "PROMPT_ENGINE": "template",
+    "CLAUDE_MODEL": "claude-opus-5-5"
+  }
+  // Secrets (nicht ins Repo!): wrangler secret put IP_SALT | STRIPE_SECRET_KEY | ANTHROPIC_API_KEY
+}
