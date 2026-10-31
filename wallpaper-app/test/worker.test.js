@@ -8,7 +8,7 @@ function makeEnv(extra = {}) {
   const aiCalls = [];
   const env = {
     KV: new MemoryKV(), IMAGES: fakeImages(imageLog), ASSETS: fakeAssets, AI: fakeAI(aiCalls),
-    FREE_PER_DAY: '2', DAILY_IMAGE_CAP: '100', IP_SALT: 'test', ...extra,
+    FREE_PER_DAY: '2', DAILY_NEURON_BUDGET: '9000', IP_SALT: 'test', ...extra,
   };
   return { env, imageLog, aiCalls };
 }
@@ -16,7 +16,7 @@ function makeEnv(extra = {}) {
 const gen = (env, ip = '9.9.9.9') => worker.fetch(new Request('https://app.test/api/generate', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': ip },
-  body: JSON.stringify({ settings: { motif: 'uhrwerk' }, device: { width: 1080, height: 2400 } }),
+  body: JSON.stringify({ settings: { variation: 42 }, device: { width: 1080, height: 2400 } }),
 }), env);
 
 test('Generierung liefert Vorschau MIT Wasserzeichen und speichert Original', async () => {
@@ -25,7 +25,10 @@ test('Generierung liefert Vorschau MIT Wasserzeichen und speichert Original', as
   assert.equal(res.status, 200);
   assert.equal(res.headers.get('X-Prompt-Engine'), 'template');
   assert.equal(res.headers.get('X-Remaining'), '1');
-  assert.equal(aiCalls[0].model, '@cf/black-forest-labs/flux-1-schnell');
+  assert.equal(aiCalls[0].model, '@cf/black-forest-labs/flux-2-klein-4b');
+  assert.equal(aiCalls[0].input.height, '1536');
+  assert.match(aiCalls[0].input.prompt, /smartphone/);
+  assert.ok(aiCalls[0].input.prompt.length <= 2048);
   const ops = imageLog[0];
   assert.ok(ops.some(([op, o]) => op === 'draw' && o.repeat === true), 'Wasserzeichen fehlt');
   const transform = ops.find(([op]) => op === 'transform')[1];

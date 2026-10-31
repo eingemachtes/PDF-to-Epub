@@ -10,7 +10,7 @@
 // Das saubere Original verlässt den Server nur über /api/full.
 
 import { normalizeDevice, fitLongSide, PREVIEW_LONG_SIDE } from './device.js';
-import { generateImage, DEFAULT_IMAGE_MODEL } from './generator.js';
+import { generateImage, estimateNeurons, modelSpec, DEFAULT_IMAGE_MODEL } from './generator.js';
 import { checkAndCount, remainingFor } from './limits.js';
 import { buildPrompt } from './prompt-engine.js';
 import { normalizeSettings, publicOptions } from './prompts.js';
@@ -28,7 +28,7 @@ function cfg(env) {
   const int = (v, d) => (Number.isFinite(Number.parseInt(v, 10)) ? Number.parseInt(v, 10) : d);
   return {
     perUser: int(env.FREE_PER_DAY, 3),
-    globalCap: int(env.DAILY_IMAGE_CAP, 120),
+    neuronBudget: int(env.DAILY_NEURON_BUDGET, 9000),
     priceCents: int(env.PRICE_CENTS, 199),
     currency: (env.CURRENCY || 'eur').toLowerCase(),
     salt: env.IP_SALT || 'bitte-in-wrangler-secret-setzen',
@@ -79,7 +79,10 @@ async function handleGenerate(request, env) {
   const settings = normalizeSettings(body.settings);
   const device = normalizeDevice(body.device);
 
-  const limit = await checkAndCount(env.KV, { ip: clientIp(request), salt: c.salt, perUser: c.perUser, globalCap: c.globalCap });
+  const cost = estimateNeurons(c.model, device);
+  const limit = await checkAndCount(env.KV, {
+    ip: clientIp(request), salt: c.salt, perUser: c.perUser, neuronBudget: c.neuronBudget, cost,
+  });
   if (!limit.ok) {
     const msg = limit.reason === 'global'
       ? 'Das Tageskontingent des Dienstes ist aufgebraucht. Morgen geht es weiter.'
@@ -90,9 +93,9 @@ async function handleGenerate(request, env) {
   let bytes;
   let engine;
   try {
-    const built = await buildPrompt(env, settings, device);
+    const built = await buildPrompt(env, settings, device, modelSpec(c.model).maxChars);
     engine = built.engine;
-    bytes = await generateImage(env.AI, { prompt: built.prompt, device, model: c.model });
+    bytes = await generateImage(env.AI, { prompt: built.prompt, device, seed: settings.variation, model: c.model });
   } catch (err) {
     console.error('Generierung fehlgeschlagen:', err?.message);
     return json({ error: 'Die Bildgenerierung ist gerade nicht verfügbar (evtl. Tageskontingent erreicht).' }, 503);

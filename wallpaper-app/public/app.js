@@ -9,6 +9,8 @@ const PRESETS = [
   { id: 'iphone', label: 'iPhone Pro (1179 × 2556)', w: 1179, h: 2556 },
   { id: 'iphone-max', label: 'iPhone Pro Max (1290 × 2796)', w: 1290, h: 2796 },
   { id: 'tablet', label: 'Tablet hochkant (1640 × 2360)', w: 1640, h: 2360 },
+  { id: 'laptop', label: 'Laptop 16:10 (1920 × 1200)', w: 1920, h: 1200 },
+  { id: 'laptop-hi', label: 'Laptop 16:10 (2560 × 1600)', w: 2560, h: 1600 },
   { id: 'fhd', label: 'Desktop Full HD (1920 × 1080)', w: 1920, h: 1080 },
   { id: 'qhd', label: 'Desktop QHD (2560 × 1440)', w: 2560, h: 1440 },
   { id: '4k', label: 'Desktop 4K (3840 × 2160)', w: 3840, h: 2160 },

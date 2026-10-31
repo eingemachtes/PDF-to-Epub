@@ -43,7 +43,12 @@ export const fakeAssets = {
 export function fakeAI(calls) {
   return {
     async run(model, input) {
-      calls.push({ model, input });
+      let fields = input;
+      if (input.multipart) {
+        const form = await new Response(input.multipart.body, { headers: { 'Content-Type': input.multipart.contentType } }).formData();
+        fields = Object.fromEntries(form);
+      }
+      calls.push({ model, input: fields });
       return { image: btoa('JPEGDATA') };
     },
   };

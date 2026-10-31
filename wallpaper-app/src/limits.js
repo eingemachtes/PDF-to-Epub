@@ -1,4 +1,4 @@
-// Kostenschutz: Limit pro Nutzer (gehashte IP) und globales Tageslimit.
+// Kostenschutz: Bilder pro Nutzer (gehashte IP) und globales Neuron-Budget pro Tag.
 // KV ist nur "eventually consistent" – die Zähler sind daher Näherungswerte.
 // Die harte Kostengrenze ist der Cloudflare Free-Plan selbst: über 10.000
 // Neurons/Tag liefert Workers AI dort einen Fehler statt einer Rechnung.
@@ -17,18 +17,18 @@ export async function hashIp(ip, salt) {
 
 async function readCount(kv, key) {
   const v = await kv.get(key);
-  return v ? Number.parseInt(v, 10) || 0 : 0;
+  return v ? Number.parseFloat(v) || 0 : 0;
 }
 
-// Prüft beide Limits und zählt bei Erfolg hoch (vor der Generierung, damit
-// auch fehlgeschlagene Versuche zählen und niemand das Limit umgehen kann).
-export async function checkAndCount(kv, { ip, salt, perUser, globalCap, now = new Date() }) {
+// Prüft beide Limits und bucht bei Erfolg (vor der Generierung, damit auch
+// fehlgeschlagene Versuche zählen und niemand das Limit umgehen kann).
+export async function checkAndCount(kv, { ip, salt, perUser, neuronBudget, cost, now = new Date() }) {
   const day = today(now);
   const userKey = `cnt:u:${day}:${await hashIp(ip, salt)}`;
-  const globalKey = `cnt:g:${day}`;
-  const [used, globalUsed] = await Promise.all([readCount(kv, userKey), readCount(kv, globalKey)]);
+  const globalKey = `cnt:n:${day}`;
+  const [used, neuronsUsed] = await Promise.all([readCount(kv, userKey), readCount(kv, globalKey)]);
 
-  if (globalUsed >= globalCap) {
+  if (neuronsUsed + cost > neuronBudget) {
     return { ok: false, reason: 'global', remaining: 0 };
   }
   if (used >= perUser) {
@@ -37,7 +37,7 @@ export async function checkAndCount(kv, { ip, salt, perUser, globalCap, now = ne
   const opts = { expirationTtl: 2 * DAY_SECONDS };
   await Promise.all([
     kv.put(userKey, String(used + 1), opts),
-    kv.put(globalKey, String(globalUsed + 1), opts),
+    kv.put(globalKey, String(neuronsUsed + cost), opts),
   ]);
   return { ok: true, remaining: perUser - used - 1 };
 }

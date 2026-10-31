@@ -8,10 +8,11 @@
   // PWA-Dateien; /api/* läuft zuerst durch den Worker.
   "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": ["/api/*"] },
 
-  // Workers AI (Free: 10.000 Neurons/Tag, darüber Fehler statt Kosten auf dem Free-Plan)
+  // Workers AI (Free: 10.000 Neurons/Tag, darüber Fehler statt Kosten auf dem Free-Plan).
+  // DAILY_NEURON_BUDGET hält Abstand dazu; ein Bild mit flux-2-klein-4b kostet ca. 156 Neurons.
   "ai": { "binding": "AI" },
 
-  // Cloudflare Images: Zuschnitt + Wasserzeichen serverseitig
+  // Cloudflare Images: Zuschnitt + Wasserzeichen serverseitig (Free: 5.000 Transformationen/Monat, darüber Fehler statt Kosten)
   "images": { "binding": "IMAGES" },
 
   // KV: Zähler für Limits + Originalbilder (48 h). ID nach `wrangler kv namespace create KV` eintragen.
@@ -19,10 +20,10 @@
 
   "vars": {
     "FREE_PER_DAY": "3",
-    "DAILY_IMAGE_CAP": "120",
+    "DAILY_NEURON_BUDGET": "9000",
     "PRICE_CENTS": "199",
     "CURRENCY": "eur",
-    "IMAGE_MODEL": "@cf/black-forest-labs/flux-1-schnell",
+    "IMAGE_MODEL": "@cf/black-forest-labs/flux-2-klein-4b",
     // "template" = kostenlos. "claude" nur mit ANTHROPIC_API_KEY (verursacht Kosten!)
     "PROMPT_ENGINE": "template",
     "CLAUDE_MODEL": "claude-opus-5-5"
